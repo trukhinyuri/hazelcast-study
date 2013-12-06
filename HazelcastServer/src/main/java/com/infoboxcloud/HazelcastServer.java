@@ -1,10 +1,12 @@
 package com.infoboxcloud;
 
 import com.hazelcast.config.Config;
+import com.hazelcast.config.JoinConfig;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Queue;
 
@@ -14,9 +16,19 @@ import java.util.Queue;
 public class HazelcastServer {
     public void run() {
         Config cfg = new Config();
-        NetworkConfig nc = new NetworkConfig();
-        nc.setPublicAddress("109.120.149.175");
-        cfg.setNetworkConfig(nc);
+        NetworkConfig networkConfig = cfg.getNetworkConfig();
+        JoinConfig join = networkConfig.getJoin();
+        join.getMulticastConfig().setEnabled(false);
+        join.getTcpIpConfig().addMember("109.120.149.234").addMember("109.120.149.236").addMember("109.120.149.200").addMember("109.120.149.184").setEnabled(true);
+
+        ArrayList<String> interfaces = new ArrayList<>();
+        interfaces.add("109.120.149.234");
+        interfaces.add("109.120.149.236");
+        interfaces.add("109.120.149.200");
+        interfaces.add("109.120.149.184");
+
+        networkConfig.getInterfaces().setEnabled(true).setInterfaces(interfaces);
+
         HazelcastInstance instance = Hazelcast.newHazelcastInstance(cfg);
         Map<Integer, String> mapCustomers = instance.getMap("customers");
         mapCustomers.put(1, "Joe");
